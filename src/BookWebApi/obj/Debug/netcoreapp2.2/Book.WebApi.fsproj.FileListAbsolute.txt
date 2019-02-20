@@ -1,0 +1,11 @@
+/home/power/F#PROJECT/BookWebApi/src/BookWebApi/bin/Debug/netcoreapp2.2/web.config
+/home/power/F#PROJECT/BookWebApi/src/BookWebApi/bin/Debug/netcoreapp2.2/Book.WebApi.deps.json
+/home/power/F#PROJECT/BookWebApi/src/BookWebApi/bin/Debug/netcoreapp2.2/Book.WebApi.runtimeconfig.json
+/home/power/F#PROJECT/BookWebApi/src/BookWebApi/bin/Debug/netcoreapp2.2/Book.WebApi.runtimeconfig.dev.json
+/home/power/F#PROJECT/BookWebApi/src/BookWebApi/bin/Debug/netcoreapp2.2/Book.WebApi.dll
+/home/power/F#PROJECT/BookWebApi/src/BookWebApi/bin/Debug/netcoreapp2.2/Book.WebApi.pdb
+/home/power/F#PROJECT/BookWebApi/src/BookWebApi/obj/Debug/netcoreapp2.2/Book.WebApi.fsprojAssemblyReference.cache
+/home/power/F#PROJECT/BookWebApi/src/BookWebApi/obj/Debug/netcoreapp2.2/Book.WebApi.AssemblyInfoInputs.cache
+/home/power/F#PROJECT/BookWebApi/src/BookWebApi/obj/Debug/netcoreapp2.2/Book.WebApi.AssemblyInfo.fs
+/home/power/F#PROJECT/BookWebApi/src/BookWebApi/obj/Debug/netcoreapp2.2/Book.WebApi.dll
+/home/power/F#PROJECT/BookWebApi/src/BookWebApi/obj/Debug/netcoreapp2.2/Book.WebApi.pdb
