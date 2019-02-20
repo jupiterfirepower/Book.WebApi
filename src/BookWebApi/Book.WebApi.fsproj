@@ -1,0 +1,51 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <DebugType>portable</DebugType>
+    <AssemblyName>Book.WebApi</AssemblyName>
+    <OutputType>Exe</OutputType>
+    <EnableDefaultContentItems>false</EnableDefaultContentItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.App" Version="2.2.2" />
+    <PackageReference Include="Giraffe" Version="3.4.*" />
+    <PackageReference Include="Microsoft.Data.SQLite" Version="2.2.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.2.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="2.2.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Analyzers" Version="2.2.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="2.2.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="2.2.2" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Primitives" Version="2.2.0" />
+    <PackageReference Include="TaskBuilder.fs" Version="2.1.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="WebRoot\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Compile Include="Models.fs" />
+    <Compile Include="DataAccess.fs" />
+    <Compile Include="RequestModels.fs" />
+    <Compile Include="Handlers.fs" />
+    <Compile Include="DbCreate.fs" />
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="web.config" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+
+</Project>
