@@ -3,6 +3,8 @@ namespace Book.WebApi
 module DbCreator=
     
     open Microsoft.Data.Sqlite
+    open Book.WebApi.BookStoreAccess
+    open Book.WebApi.Models
 
     type BookData = { 
          BookId: int32;
@@ -20,15 +22,15 @@ module DbCreator=
         {  BookId = 0; Author = "Arnold4"; Title = "Programming F#4"; PublishedYear = 2016; Pages = 260 };
         {  BookId = 0; Author = "Arnold5"; Title = "Programming F#5"; PublishedYear = 2017; Pages = 260 };
         {  BookId = 0; Author = "Arnold6"; Title = "Programming F#6"; PublishedYear = 2018; Pages = 730 }; 
+        {  BookId = 0; Author = "Arnold7"; Title = "Programming F#7"; PublishedYear = 2018; Pages = 730 }; 
+        {  BookId = 0; Author = "Arnold8"; Title = "Programming F#8"; PublishedYear = 2018; Pages = 730 }; 
     ]
 
     type SqliteDbCreator() =
         member x.CreateDb = 
             let databaseFilename = "books.db"
             let connectionString = sprintf "Data Source=%s;" databaseFilename
-            let connectionStringMemory = sprintf "Data Source=:memory:;" //Version=3;New=True;
-            //let connection = new SqliteConnection(connectionStringMemory)
-            // SqliteConnection.CreateFile(databaseFilename)
+            let connectionStringMemory = sprintf "Data Source=:memory:;" 
             let connection = new SqliteConnection(connectionString)
             connection.Open()
 
@@ -64,6 +66,18 @@ module DbCreator=
             |> List.sum
             |> (fun recordsAdded -> printfn "Records added: %d" recordsAdded)
 
+
+            let book = { Models.BookData.BookId = 0; Author = "Arnold11"; Title = "Programming F#11"; PublishedYear = 2019; Pages = 820 }
+            BookStoreAccess.addBook(book) |> ignore
+
+            let book = { Models.BookData.BookId = 0; Author = "Arnold12"; Title = "Programming F#12"; PublishedYear = 2019; Pages = 820 }
+            BookStoreAccess.addBook(book) |> ignore
+
+            let book = { Models.BookData.BookId = 1; Author = "ArnoldUpdated"; Title = "Programming F# Updated"; PublishedYear = 2019; Pages = 820 }
+            BookStoreAccess.updateBook(book) |> ignore
+
+            BookStoreAccess.deleteBook(book) |> ignore
+
             let selectSql = "select * from Books order by Pages desc"
             let selectCommand = new SqliteCommand(selectSql, connection)
             let reader = selectCommand.ExecuteReader()
@@ -75,4 +89,8 @@ module DbCreator=
                   (System.Convert.ToInt32(reader.["Pages"]))
 
             connection.Close()
+
+            
+
+            
 

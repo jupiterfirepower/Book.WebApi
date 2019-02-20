@@ -28,6 +28,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Primitives" Version="2.2.0" />
+    <PackageReference Include="NPoco" Version="3.9.4" />
     <PackageReference Include="TaskBuilder.fs" Version="2.1.*" />
   </ItemGroup>
 
@@ -37,6 +38,7 @@
     </Content>
     <Compile Include="Models.fs" />
     <Compile Include="DataAccess.fs" />
+    <Compile Include="DataAccessDirect.fs" />
     <Compile Include="RequestModels.fs" />
     <Compile Include="Handlers.fs" />
     <Compile Include="DbCreate.fs" />
