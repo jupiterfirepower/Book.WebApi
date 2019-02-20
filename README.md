@@ -34,7 +34,8 @@ After a successful build you can start the web application by executing the foll
 
 ```
 dotnet run -p src/BookWebApi
-or go to directory src/BookWebApi and execute command: dotnet run</br> before that use build.sh
+or go to directory src/BookWebApi and execute command: dotnet run
+(before that use build.sh)
 ```
 
 After the application has started visit [http://localhost:5000](http://localhost:5000) in your preferred browser.
