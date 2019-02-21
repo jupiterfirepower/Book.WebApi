@@ -18,4 +18,7 @@ let public sqliteDbConnectionString = @"Data Source=books.db"
 [<Literal>]
 let public sqliteDbConnectionStringInMemory = @"Data Source=:memory:;"
 
+[<Literal>]
+let public envTests ="Test"
+
 

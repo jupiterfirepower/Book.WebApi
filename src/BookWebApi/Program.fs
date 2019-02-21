@@ -30,16 +30,18 @@ let indexHandler (name : string) =
     json model
 
 let webApp = 
-    choose [ GET >=> choose [ routex "/books(/?)" >=> booksHandler
+    choose [ GET >=> choose [ route "/" >=> indexHandler "world"
+                              routex "/books(/?)" >=> booksHandler
                               route "/sbooks" >=> authorize >=> booksHandler
-                              routef "/book/%i" bookHandler ]
-             POST >=> 
-                      choose [
+                              routef "/book/%i" bookHandler
+                              routef "/sbook/%i" (fun id -> authorize >=> bookHandler id)
+                            ]
+             POST >=> choose [
                         route "/book" >=> bookAddHandler
                         route "/token" >=> handlePostToken
                       ]  
-             PUT >=> routef "/book/%i" bookUpdateHandler
-             DELETE >=> routef "/book/%i" bookDeleteHandler
+             PUT >=> routef "/book/%i" (fun id -> authorize >=> bookUpdateHandler id) 
+             DELETE >=> routef "/book/%i" (fun id -> authorize >=> bookDeleteHandler id)  
              setStatusCode 404 >=> text "Not Found" ]
 
 // ---------------------------------
@@ -59,8 +61,6 @@ let configureCors (builder : CorsPolicyBuilder) =
            .AllowAnyMethod()
            .AllowAnyHeader()
            |> ignore
-
-
 
 let configureApp (app : IApplicationBuilder) =
     let env = app.ApplicationServices.GetService<IHostingEnvironment>()
@@ -88,7 +88,7 @@ let configureServices (services : IServiceCollection) =
 
     services.AddDbContext<BooksContext>
         (fun (options : DbContextOptionsBuilder) -> 
-        match env.IsEnvironment("Test") with
+        match env.IsEnvironment(envTests) with
         | true -> options.UseSqlite(sqliteDbConnectionStringInMemory) |> ignore
         | false -> options.UseSqlite(sqliteDbConnectionString) |> ignore)
     |> ignore
