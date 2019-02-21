@@ -9,7 +9,10 @@ module BookStoreAccess =
     let private connString = sprintf "Data Source=%s;" (Path.Combine(Directory.GetCurrentDirectory(), "books.db"))
 
     let addBook (book: BookData) =
-        use conn = new SqliteConnection(connString)
+        let connectionStringBuilder = new SqliteConnectionStringBuilder();
+        connectionStringBuilder.DataSource <- "./books.db";
+        
+        use conn = new SqliteConnection(connectionStringBuilder.ConnectionString)
         conn.Open()
         
         use txn: SqliteTransaction = conn.BeginTransaction()

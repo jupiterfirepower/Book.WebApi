@@ -13,6 +13,12 @@ open Microsoft.Extensions.Logging
 open System
 open System.IO
 open Book.WebApi.DbCreator
+open Microsoft.AspNetCore.Authentication
+open Microsoft.AspNetCore.Authentication.JwtBearer
+open Microsoft.IdentityModel.Tokens
+open System.Text
+open Microsoft.Extensions.Configuration;
+open Book.WebApi.Constants
 
 // ---------------------------------
 // Web app
@@ -24,10 +30,14 @@ let indexHandler (name : string) =
     json model
 
 let webApp = 
-    choose [ GET >=> choose [ route "/" >=> indexHandler "world"
-                              route "/books" >=> booksHandler
+    choose [ GET >=> choose [ routex "/books(/?)" >=> booksHandler
+                              route "/sbooks" >=> authorize >=> booksHandler
                               routef "/book/%i" bookHandler ]
-             POST >=> route "/book" >=> bookAddHandler
+             POST >=> 
+                      choose [
+                        route "/book" >=> bookAddHandler
+                        route "/token" >=> handlePostToken
+                      ]  
              PUT >=> routef "/book/%i" bookUpdateHandler
              DELETE >=> routef "/book/%i" bookDeleteHandler
              setStatusCode 404 >=> text "Not Found" ]
@@ -45,10 +55,12 @@ let errorHandler (ex : Exception) (logger : ILogger) =
 // ---------------------------------
 
 let configureCors (builder : CorsPolicyBuilder) =
-    builder.WithOrigins("http://localhost:8081")
+    builder.WithOrigins("http://localhost:8080")
            .AllowAnyMethod()
            .AllowAnyHeader()
            |> ignore
+
+
 
 let configureApp (app : IApplicationBuilder) =
     let env = app.ApplicationServices.GetService<IHostingEnvironment>()
@@ -57,8 +69,19 @@ let configureApp (app : IApplicationBuilder) =
     | false -> app.UseGiraffeErrorHandler errorHandler)
         .UseHttpsRedirection()
         .UseCors(configureCors)
+        .UseAuthentication()
         .UseStaticFiles()
         .UseGiraffe(webApp)
+
+let configureAppConfiguration  (context: WebHostBuilderContext) (config: IConfigurationBuilder) =
+    config
+        .AddJsonFile(appSettingsFileName,false,true)
+        //.AddJsonFile(sprintf "appsettings.%s.json" context.HostingEnvironment.EnvironmentName ,true)
+        .AddEnvironmentVariables() |> ignore
+
+let authenticationOptions (o : AuthenticationOptions) =
+    o.DefaultAuthenticateScheme <- JwtBearerDefaults.AuthenticationScheme
+    o.DefaultChallengeScheme <- JwtBearerDefaults.AuthenticationScheme
 
 let configureServices (services : IServiceCollection) = 
     let env = services.BuildServiceProvider().GetService<IHostingEnvironment>();
@@ -66,9 +89,26 @@ let configureServices (services : IServiceCollection) =
     services.AddDbContext<BooksContext>
         (fun (options : DbContextOptionsBuilder) -> 
         match env.IsEnvironment("Test") with
-        | true -> options.UseSqlite(@"Data Source=:memory:;") |> ignore
-        | false -> options.UseSqlite(@"Data Source=books.db") |> ignore)
+        | true -> options.UseSqlite(sqliteDbConnectionStringInMemory) |> ignore
+        | false -> options.UseSqlite(sqliteDbConnectionString) |> ignore)
     |> ignore
+
+    let configuration = ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile(appSettingsFileName).Build()
+    printfn "%s" (configuration.GetSection(appKeyIssuer).Value)
+
+    //services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    services.AddAuthentication(authenticationOptions)
+        .AddJwtBearer(fun options ->
+            options.TokenValidationParameters <- TokenValidationParameters(
+                ValidateActor = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = configuration.GetSection(appKeyIssuer).Value,
+                ValidAudience = configuration.GetSection(appKeyAudience).Value,
+                IssuerSigningKey = SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.GetSection(appKeySecret).Value)))
+            ) |> ignore
+
     services.AddCors() |> ignore
     services.AddGiraffe() |> ignore
 
@@ -91,6 +131,7 @@ let main _ =
         .UseContentRoot(contentRoot)
         .UseIISIntegration()
         .UseWebRoot(webRoot)
+        .ConfigureAppConfiguration(configureAppConfiguration)
         .Configure(Action<IApplicationBuilder> configureApp)
         .ConfigureServices(configureServices)
         .ConfigureLogging(configureLogging)

@@ -14,4 +14,17 @@ type Message =
     {
         Text: string
     }
+
+[<CLIMutable>]
+type TokenResult =
+    {
+        Token : string
+    }
+
+[<CLIMutable>]
+type LoginModel =
+    {
+        Email : string
+        Password : string
+    }
     
