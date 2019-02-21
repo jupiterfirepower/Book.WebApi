@@ -38,10 +38,17 @@ let webApp =
                             ]
              POST >=> choose [
                         route "/book" >=> bookAddHandler
+                        route "/sbook" >=> authorize >=> bookAddHandler
                         route "/token" >=> handlePostToken
                       ]  
-             PUT >=> routef "/book/%i" (fun id -> authorize >=> bookUpdateHandler id) 
-             DELETE >=> routef "/book/%i" (fun id -> authorize >=> bookDeleteHandler id)  
+             PUT >=> choose [
+                        routef "/book/%i" bookUpdateHandler
+                        routef "/sbook/%i" (fun id -> authorize >=> bookUpdateHandler id)
+                     ]     
+             DELETE >=> choose [
+                           routef "/book/%i" bookDeleteHandler 
+                           routef "/sbook/%i" (fun id -> authorize >=> bookDeleteHandler id) 
+                        ]
              setStatusCode 404 >=> text "Not Found" ]
 
 // ---------------------------------
