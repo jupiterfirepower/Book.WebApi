@@ -30,24 +30,30 @@ let indexHandler (name : string) =
     json model
 
 let webApp = 
-    choose [ GET >=> choose [ route "/" >=> indexHandler "world"
-                              routex "/books(/?)" >=> booksHandler
-                              route "/sbooks" >=> authorize >=> booksHandler
-                              routef "/book/%i" bookHandler
-                              routef "/sbook/%i" (fun id -> authorize >=> bookHandler id)
-                            ]
-             POST >=> choose [
-                        route "/book" >=> bookAddHandler
-                        route "/sbook" >=> authorize >=> bookAddHandler
-                        route "/token" >=> handlePostToken
-                      ]  
-             PUT >=> choose [
-                        routef "/book/%i" bookUpdateHandler
-                        routef "/sbook/%i" (fun id -> authorize >=> bookUpdateHandler id)
-                     ]     
-             DELETE >=> choose [
-                           routef "/book/%i" bookDeleteHandler 
-                           routef "/sbook/%i" (fun id -> authorize >=> bookDeleteHandler id) 
+    choose [ GET >=> 
+                 choose [ 
+                           route "/" >=> indexHandler "world"
+                           routex "/books(/?)" >=> booksHandler
+                           route "/sbooks" >=> authorize >=> booksHandler
+                           routef "/book/%i" bookHandler
+                           routef "/sbook/%i" (fun id -> authorize >=> bookHandler id)
+                           route "/secured" >=> authorize >=> handleGetSecured 
+                        ]
+             POST >=> 
+                  choose [
+                            route "/book" >=> bookAddHandler
+                            route "/sbook" >=> authorize >=> bookAddHandler
+                            route "/token" >=> handlePostToken 
+                         ]  
+             PUT >=> 
+                 choose [
+                           routef "/book/%i" bookUpdateHandler
+                           routef "/sbook/%i" (fun id -> authorize >=> bookUpdateHandler id)
+                        ]
+             DELETE >=> 
+                 choose [
+                           routef "/book/%i" bookDeleteHandler
+                           routef "/sbook/%i" (fun id -> authorize >=> bookDeleteHandler id)
                         ]
              setStatusCode 404 >=> text "Not Found" ]
 
