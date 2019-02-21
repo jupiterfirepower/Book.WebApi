@@ -25,22 +25,21 @@ module BooksRepository =
     
     let addBookAsync (context : BooksContext) (entity : BookData) = 
         async { 
-            context.Books.AddAsync(entity)
-            |> Async.AwaitTask
-            |> ignore
+            context.Books.AddAsync(entity) |> Async.AwaitTask |> ignore
             let! result = context.SaveChangesAsync true |> Async.AwaitTask
-            let result = 
-                if result >= 1 then Some(entity)
-                else None
-            return result
+            return match result with
+                   | x when x >= 1 -> Some(entity)
+                   | _ -> None
         }
     
     let updateBook (context : BooksContext) (entity : BookData) (id : int) = 
         let current = context.Books.Find(id)
         let updated = { entity with BookId = id }
         context.Entry(current).CurrentValues.SetValues(updated)
-        if context.SaveChanges true >= 1 then Some(updated)
-        else None
+        let result = match (context.SaveChanges true) with
+                     | x when x >= 1 -> Some(updated)
+                     | _ -> None
+        result
     
     let deleteBook (context : BooksContext) (id : int) = 
         let current = context.Books.Find(id)
