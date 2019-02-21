@@ -14,6 +14,7 @@ open Microsoft.IdentityModel.Tokens
 open Microsoft.AspNetCore.Authentication.JwtBearer
 open Microsoft.Extensions.Configuration
 open Book.WebApi.Constants
+open System.Security.Cryptography
 
 let booksHandler = 
     fun (next : HttpFunc) (ctx : HttpContext) -> 
@@ -65,10 +66,16 @@ let bookDeleteHandler (id : int) =
 
 let authorize: HttpHandler = requiresAuthentication (challenge JwtBearerDefaults.AuthenticationScheme)
 
+let rndTokenGen = 
+    let bytes: byte[] = Array.zeroCreate 15
+    use crypto = new RNGCryptoServiceProvider()
+    crypto.GetBytes(bytes) |> ignore
+    Convert.ToBase64String(bytes)
+
 let generateToken email issuer audience (secret:string) =
     let claims = [|
         Claim(JwtRegisteredClaimNames.Email, email);
-        Claim(JwtRegisteredClaimNames.Sub, email);
+        Claim(JwtRegisteredClaimNames.Sub, rndTokenGen);
         Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()) |]
 
     let expires = Nullable(DateTime.UtcNow.AddHours(1.0))
