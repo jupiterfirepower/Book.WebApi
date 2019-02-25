@@ -7,6 +7,7 @@ open Giraffe
 open Microsoft.AspNetCore.Http
 open FSharp.Control.Tasks.V2
 open System
+open System.Linq
 open System.Text
 open System.Security.Claims
 open System.IdentityModel.Tokens.Jwt
@@ -101,18 +102,21 @@ let generateToken email issuer audience (secret:string) =
 let handleGetSecured =
     fun (next : HttpFunc) (ctx : HttpContext) ->
         let email = ctx.User.FindFirst ClaimTypes.NameIdentifier
-            
         text ("User " + email.Value + " is authorized to access this resource.") next ctx
 
 let handlePostToken =
     fun (next : HttpFunc) (ctx : HttpContext) ->
         task {
             let! model = ctx.BindJsonAsync<LoginModel>()
-
-            // authenticate user
-            let configuration = ctx.GetService<IConfiguration>()
-            
-            let tokenResult = generateToken model.Email (configuration.GetSection(appKeyIssuer).Value) (configuration.GetSection(appKeyAudience).Value) (configuration.GetSection(appKeySecret).Value)
-
-            return! json tokenResult next ctx
+            use context = ctx.RequestServices.GetService(typeof<BooksContext>) :?> BooksContext
+            let users = getAllUsers context 
+            let user = users.SingleOrDefault(fun x -> x.Email.Equals(model.Email))
+            if user.Password.Equals(model.Password) then
+                // authenticated user
+                let configuration = ctx.GetService<IConfiguration>()
+                let tokenResult = generateToken model.Email (configuration.GetSection(appKeyIssuer).Value) (configuration.GetSection(appKeyAudience).Value) (configuration.GetSection(appKeySecret).Value)
+                return! json tokenResult next ctx
+            else
+                // user email not found in table Users
+                return!  (setStatusCode 404 >=> json "Email not found") next ctx
         }

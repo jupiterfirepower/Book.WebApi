@@ -10,6 +10,14 @@ type BookData =
         Pages: int32 
     }
 
+[<CLIMutable>]
+type User = { 
+         UserId: int32
+         Name:string 
+         Password:string 
+         Email:string 
+    }
+
 type Message =
     {
         Text: string

@@ -32,10 +32,12 @@ let indexHandler (name : string) =
 let webApp = 
     choose [ GET >=> 
                  choose [ 
+                           route "/" >=> indexHandler "world"
                            routex "/books(/?)" >=> booksHandler
                            route "/sbooks" >=> authorize >=> booksHandler
                            routef "/book/%i" bookHandler
                            routef "/sbook/%i" (fun id -> authorize >=> bookHandler id)
+                           route "/secured" >=> authorize >=> handleGetSecured 
                         ]
              POST >=> 
                   choose [
@@ -54,7 +56,6 @@ let webApp =
                            routef "/sbook/%i" (fun id -> authorize >=> bookDeleteHandler id)
                         ]
              setStatusCode 404 >=> text "Not Found" ]
-
 // ---------------------------------
 // Error handler
 // ---------------------------------

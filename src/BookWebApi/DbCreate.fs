@@ -3,7 +3,6 @@ namespace Book.WebApi
 module DbCreator=
     
     open Microsoft.Data.Sqlite
-    open Book.WebApi.BookStoreAccess
     open Book.WebApi.Models
 
     type BookData = { 
@@ -12,6 +11,13 @@ module DbCreator=
          Title:string; 
          PublishedYear:int32;
          Pages:int32 }
+
+    type User = { 
+         UserId: int32
+         Name:string 
+         Password:string 
+         Email:string 
+    }
 
     // Sample Data
     let books = [
@@ -24,6 +30,10 @@ module DbCreator=
         {  BookId = 0; Author = "Arnold6"; Title = "Programming F#6"; PublishedYear = 2018; Pages = 730 }; 
         {  BookId = 0; Author = "Arnold7"; Title = "Programming F#7"; PublishedYear = 2018; Pages = 730 }; 
         {  BookId = 0; Author = "Arnold8"; Title = "Programming F#8"; PublishedYear = 2018; Pages = 730 }; 
+    ]
+
+    let users = [
+        {  UserId = 0; Name = "sysuser"; Password = "syspassword"; Email = "sysemail@domain.com" };
     ]
 
     type SqliteDbCreator() =
@@ -44,11 +54,21 @@ module DbCreator=
 
             let dropTableSql = "DROP TABLE IF EXISTS Books;"
 
-            let dropCommand = new SqliteCommand(dropTableSql, connection)
+            use dropCommand = new SqliteCommand(dropTableSql, connection)
             dropCommand.ExecuteNonQuery() |> ignore
 
-            let structureCommand = new SqliteCommand(structureSql, connection)
+            use structureCommand = new SqliteCommand(structureSql, connection)
             structureCommand.ExecuteNonQuery() |> ignore
+
+            let createUserTableSql =
+                "CREATE TABLE IF NOT EXISTS Users (" +
+                "UserId INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT," +
+                "Name text NOT NULL, " +
+                "Password text NOT NULL, " + 
+                "Email text NOT NULL)"
+
+            use usersCommand = new SqliteCommand(createUserTableSql, connection)
+            usersCommand.ExecuteNonQuery() |> ignore
     
             // Add records
             let insertSql = 
@@ -65,6 +85,21 @@ module DbCreator=
                command.ExecuteNonQuery())
             |> List.sum
             |> (fun recordsAdded -> printfn "Records added: %d" recordsAdded)
+
+            // Add User record
+            let insertUserSql = 
+                "insert into Users(Name, Password, Email) " + 
+                "values (@name, @password, @email)"
+
+            users
+            |> List.map(fun x ->
+               use command = new SqliteCommand(insertUserSql, connection)
+               command.Parameters.AddWithValue("@name", x.Name) |> ignore
+               command.Parameters.AddWithValue("@password", x.Password) |> ignore
+               command.Parameters.AddWithValue("@email", x.Email) |> ignore
+               command.ExecuteNonQuery())
+            |> List.sum
+            |> (fun recordsAdded -> printfn "User records added: %d" recordsAdded)
 
 
             let book = { Models.BookData.BookId = 0; Author = "Arnold11"; Title = "Programming F#11"; PublishedYear = 2019; Pages = 820 }
